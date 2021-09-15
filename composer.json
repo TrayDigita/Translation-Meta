@@ -1,0 +1,35 @@
+{
+    "name": "traydigita/translation-meta",
+    "description": "Translation metadata collector.",
+    "version": "1.0.0",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "ArrayIterator",
+            "role": "developer",
+            "email": "me@arrayiterator.com"
+        }
+    ],
+    "keywords": [
+        "Php",
+        "WordPress",
+        "WordPress Translation Metadata"
+    ],
+    "minimum-stability": "stable",
+    "config": {
+        "optimize-autoloader": true
+    },
+    "require": {
+        "php": "^7.0|^8",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "TrayDigita\\TranslationMeta\\": "src/"
+        }
+    }
+}
