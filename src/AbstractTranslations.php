@@ -52,6 +52,7 @@ abstract class AbstractTranslations
             || !isset($this->translations[$textDomain][$locale])
         ) {
             $this->translations[$textDomain][$locale] = $translation;
+            return true;
         }
 
         return false;
