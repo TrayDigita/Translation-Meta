@@ -24,7 +24,7 @@ namespace TrayDigita\TranslationMeta;
 abstract class AbstractTranslations
 {
     /**
-     * @var array<string, array<string, AbstractTranslation>>
+     * @var array<string, array<string, array<string, AbstractTranslation>>>
      */
     protected $translations = [];
 
@@ -42,17 +42,19 @@ abstract class AbstractTranslations
      * @param AbstractTranslation $translation
      * @param string|null $locale
      *
-     * @return bool
+     * @return false|string
      */
-    public function add(AbstractTranslation $translation, string $locale = null) : bool
+    public function add(AbstractTranslation $translation, string $locale = null)
     {
         $textDomain = $translation->getTextDomain();
         $locale = $locale?:$translation->getLocale();
+        $hash = \spl_object_hash($translation);
         if (!isset($this->translations[$textDomain])
             || !isset($this->translations[$textDomain][$locale])
+            || !isset($this->translations[$textDomain][$locale][$hash])
         ) {
-            $this->translations[$textDomain][$locale] = $translation;
-            return true;
+            $this->translations[$textDomain][$locale][$hash] = $translation;
+            return $hash;
         }
 
         return false;
@@ -63,15 +65,23 @@ abstract class AbstractTranslations
      *
      * @param string $locale
      * @param AbstractTranslation $translation
+     * @return string
      */
-    public function set(AbstractTranslation $translation, string $locale = null)
+    public function set(AbstractTranslation $translation, string $locale = null) : string
     {
         $textDomain = $translation->getTextDomain();
         $locale = $locale?:$translation->getLocale();
-        $this->translations[$textDomain][$locale] = $translation;
+        $hash = \spl_object_hash($translation);
+        $this->translations[$textDomain][$locale][$hash] = $translation;
+        return $hash;
     }
 
-    public function remove(string $text_domain, string $locale = null)
+    /**
+     * @param string $text_domain
+     * @param string|null $locale
+     * @param string|null $hash
+     */
+    public function remove(string $text_domain, string $locale = null, string $hash = null)
     {
         if (!isset($this->translations[$text_domain])) {
             return;
@@ -80,16 +90,21 @@ abstract class AbstractTranslations
             unset($this->translations[$text_domain]);
             return;
         }
-        unset($this->translations[$text_domain][$text_domain]);
+        if (!$hash) {
+            unset($this->translations[$text_domain][$text_domain]);
+            return;
+        }
+        unset($this->translations[$text_domain][$text_domain][$hash]);
     }
 
     /**
      * @param string $text_domain
      * @param string|null $locale
+     * @param string|null $hash
      *
-     * @return AbstractTranslation|AbstractTranslation[]|null
+     * @return AbstractTranslation|AbstractTranslation[]|AbstractTranslation[][]|null
      */
-    public function get(string $text_domain, string $locale = null)
+    public function get(string $text_domain, string $locale = null, string $hash = null)
     {
         if (!isset($this->translations[$text_domain])) {
             return null;
@@ -98,6 +113,13 @@ abstract class AbstractTranslations
         if (!$locale) {
             return $this->translations[$text_domain];
         }
-        return $this->translations[$text_domain][$locale];
+        if (!isset($this->translations[$text_domain][$locale])) {
+            return null;
+        }
+        if (!$hash) {
+            return $this->translations[$text_domain][$locale];
+        }
+
+        return $this->translations[$text_domain][$locale][$hash]??null;
     }
 }
